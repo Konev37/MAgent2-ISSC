@@ -8,6 +8,7 @@ from pettingzoo.utils import random_demo
 from magent2.environments import battle_v4
 
 from vcg import vcg_auction
+from sequential import sequential_auction
 
 
 def default_policy(obs, agent):
@@ -58,6 +59,8 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='ra
                         action = random_policy(obs, agent)
                     elif red_policy == 'vcg':
                         action = vcg_auction(obs)
+                    elif red_policy == 'seq':
+                        action = sequential_auction(obs)
                     else:
                         action = default_policy(obs, agent)
                 else:
@@ -76,6 +79,6 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='ra
 if __name__ == '__main__':
     env = battle_v4.env(render_mode='human')
     """
-    red_policy: random, default, vcg, comb, seq
+    red_policy: random, default, vcg, seq
     """
-    mkt_mech(env, render=False, episodes=1, red_policy='vcg', blue_policy='random')
+    mkt_mech(env, render=False, episodes=1, red_policy='seq', blue_policy='random')

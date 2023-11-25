@@ -5,53 +5,41 @@ MAP_SIZE = 45
 ATK_UTIL = 100  # 这个值必须要大于MAP_SIZE，否则智能体会认为攻击的效用不如移动的效用
 
 
-def vcg_auction(observation):
+def sequential_auction(observation):
     best_action = None
-    min_vcg_payment = float('inf')  # 正无穷
+    max_utility = float('-inf')  # 负无穷
 
     for action in range(21):  # 遍历所有动作
-        vcg_payment = compute_vcg_payment(action, observation)
+        utility = compute_utility(action, observation)
 
-        if vcg_payment is None:
+        if utility is None:
             # 向右方的随机值
             return random.choice([3, 7, 8, 11])
             # 移动动作的随机值
             # return random.randint(0, 12)
 
-        if vcg_payment < min_vcg_payment:
-            min_vcg_payment = vcg_payment
+        if utility > max_utility:
+            max_utility = utility
             best_action = action
 
     return best_action
 
 
-def compute_vcg_payment(action, current_obs):
-    impact = compute_impact(action, current_obs)
-    if impact is None:
-        return None
-    else:
-        # 计算其他红方智能体选择该动作的估值，即VCG支付
-        vcg_payment = -impact  # 注意这里取负值
-        return vcg_payment
+def compute_utility(action, current_obs):
+    # 计算动作的效用，包括移动和攻击的效用
+    move_utility = compute_move_utility(action, current_obs)
+    attack_utility = compute_attack_utility(action, current_obs)
 
-
-def compute_impact(action, current_obs):
-    # 考虑移动带来的影响
-    move_impact = compute_move_impact(action, current_obs)
-
-    # 考虑攻击带来的影响
-    attack_impact = compute_attack_impact(action, current_obs)
-
-    if move_impact is None or attack_impact is None:
+    if move_utility is None or attack_utility is None:
         return None
 
-    # 总体影响为移动带来的影响加上攻击带来的影响
-    total_impact = move_impact + attack_impact
+    # 总体效用为移动效用加上攻击效用
+    total_utility = move_utility + attack_utility
 
-    return total_impact
+    return total_utility
 
 
-def compute_move_impact(action, current_obs):
+def compute_move_utility(action, current_obs):
     # 判断动作是否是移动
     if 0 <= action <= 12:
         # 获取当前智能体的坐标
@@ -73,14 +61,14 @@ def compute_move_impact(action, current_obs):
             return 0
 
         # 影响的计算，可以根据实际情况进行调整
-        impact = MAP_SIZE / min_distance  # 距离越近，影响越大
+        move_utility = MAP_SIZE / min_distance  # 距离越近，影响越大
 
-        return impact
+        return move_utility
 
     return 0
 
 
-def compute_attack_impact(action, current_obs):
+def compute_attack_utility(action, current_obs):
     # 判断动作是否是攻击
     if 13 <= action <= 20:
         agent_position = AGT_POS
@@ -101,8 +89,8 @@ def compute_attack_impact(action, current_obs):
         if attack_target_position in blue_agent_positions:
             # 攻击目标在观测范围内，计算对其的影响
             attack_power = ATK_UTIL
-            attack_impact = attack_power  # 攻击的影响
-            return attack_impact
+            attack_utility = attack_power  # 攻击的影响
+            return attack_utility
 
     # 如果不是攻击动作或者攻击目标不在范围内，攻击影响为0
     return 0
