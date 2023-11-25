@@ -7,10 +7,10 @@ from pettingzoo.utils import random_demo
 
 from magent2.environments import battle_v4
 
-env = battle_v4.env(render_mode='human')
+import vcg
 
 
-def red_policy(obs, agent):
+def default_policy(obs, agent):
     if obs[5][5][3] == 1:
         action = 13
     elif obs[5][6][3] == 1:
@@ -28,16 +28,18 @@ def red_policy(obs, agent):
     elif obs[7][7][3] == 1:
         action = 20
     else:
-        action = 7
+        if 'red' in agent:
+            action = 7
+        else:
+            action = 5
     return action
-    # return env.action_space(agent).sample()
 
 
-def blue_policy(obs, agent):
+def random_policy(obs, agent):
     return env.action_space(agent).sample()
 
 
-def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1) -> float:
+def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='random', blue_policy='random') -> float:
     completed_episodes = 0
     while completed_episodes < episodes:
         env.reset()
@@ -51,11 +53,18 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1) -> float:
             elif isinstance(obs, dict) and "action_mask" in obs:
                 action = random.choice(np.flatnonzero(obs["action_mask"]).tolist())
             else:
-                # action = env.action_space(agent).sample()
                 if 'red' in agent:
-                    action = red_policy(obs, agent)
+                    if red_policy == 'random':
+                        action = random_policy(obs, agent)
+                    elif red_policy == 'vcg':
+                        action = vcg.vcg_auction(obs)
+                    else:
+                        action = default_policy(obs, agent)
                 else:
-                    action = blue_policy(obs, agent)
+                    if blue_policy == 'random':
+                        action = random_policy(obs, agent)
+                    else:
+                        action = default_policy(obs, agent)
             env.step(action)
         completed_episodes += 1
 
@@ -65,4 +74,5 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1) -> float:
 
 
 if __name__ == '__main__':
-    mkt_mech(env, render=False, episodes=1)
+    env = battle_v4.env(render_mode='human')
+    mkt_mech(env, render=False, episodes=1, red_policy='random', blue_policy='random')
