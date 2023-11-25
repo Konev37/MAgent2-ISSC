@@ -75,4 +75,7 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='ra
 
 if __name__ == '__main__':
     env = battle_v4.env(render_mode='human')
+    """
+    red_policy: random, default, vcg, comb, seq
+    """
     mkt_mech(env, render=False, episodes=1, red_policy='vcg', blue_policy='random')

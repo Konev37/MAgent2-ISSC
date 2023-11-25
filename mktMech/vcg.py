@@ -2,19 +2,19 @@ import random
 
 AGT_POS = (6, 6)
 MAP_SIZE = 45
-ATK_UTIL = 100      # 这个值必须要大于MAP_SIZE，否则智能体会认为攻击的效用不如移动的效用
+ATK_UTIL = 100  # 这个值必须要大于MAP_SIZE，否则智能体会认为攻击的效用不如移动的效用
 
 
 def vcg_auction(observation):
     best_action = None
-    min_vcg_payment = float('inf')      # 正无穷
+    min_vcg_payment = float('inf')  # 正无穷
 
     for action in range(21):  # 遍历所有动作
         vcg_payment = compute_vcg_payment(action, observation)
 
         if vcg_payment is None:
             return 7
-            # 移动动作的的随机值
+            # 移动动作的随机值
             # return random.randint(0, 12)
 
         if vcg_payment < min_vcg_payment:
@@ -51,11 +51,11 @@ def compute_impact(action, current_obs):
 
 
 def compute_move_impact(action, current_obs):
-    # 获取当前智能体的坐标
-    current_agent_position = AGT_POS
-
     # 判断动作是否是移动
     if 0 <= action <= 5 or 7 <= action <= 12:
+        # 获取当前智能体的坐标
+        current_agent_position = AGT_POS
+
         # 获取智能体移动后的坐标
         new_agent_position = get_new_agent_position(action, current_agent_position)
 
@@ -80,19 +80,19 @@ def compute_move_impact(action, current_obs):
 
 
 def compute_attack_impact(action, current_obs):
-    agent_position = AGT_POS
-
-    # 获取所有蓝方智能体的坐标
-    blue_agent_positions = get_blue_agent_positions(current_obs)
-
-    if len(blue_agent_positions) is 0:
-        return None
-
-    # 获取所有蓝方智能体的坐标和生命值
-    # blue_agents_info = [(pos, current_obs[pos[0], pos[1], 4]) for pos in blue_agent_positions]
-
     # 判断动作是否是攻击
     if 13 <= action <= 20:
+        agent_position = AGT_POS
+
+        # 获取所有蓝方智能体的坐标
+        blue_agent_positions = get_blue_agent_positions(current_obs)
+
+        if len(blue_agent_positions) is 0:
+            return None
+
+        # 获取所有蓝方智能体的坐标和生命值
+        # blue_agents_info = [(pos, current_obs[pos[0], pos[1], 4]) for pos in blue_agent_positions]
+
         # 获取攻击目标的坐标
         attack_target_position = get_attack_target_position(action, agent_position)
 
@@ -100,7 +100,7 @@ def compute_attack_impact(action, current_obs):
         if attack_target_position in blue_agent_positions:
             # 攻击目标在观测范围内，计算对其的影响
             attack_power = ATK_UTIL
-            attack_impact = attack_power  # 负值表示对生命值的减少的效用
+            attack_impact = attack_power  # 攻击的影响
             return attack_impact
 
     # 如果不是攻击动作或者攻击目标不在范围内，攻击影响为0
