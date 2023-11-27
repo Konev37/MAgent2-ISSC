@@ -9,6 +9,7 @@ from magent2.environments import battle_v4
 
 from vcg import vcg_auction
 from sequential import sequential_auction
+from random_nth_price import random_nth_price_auction
 
 
 def default_policy(obs, agent):
@@ -61,6 +62,8 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='ra
                         action = vcg_auction(obs)
                     elif red_policy == 'seq':
                         action = sequential_auction(obs)
+                    elif red_policy == 'rand_n':
+                        action = random_nth_price_auction(obs)
                     else:
                         action = default_policy(obs, agent)
                 else:
@@ -79,6 +82,6 @@ def mkt_mech(env: AECEnv, render: bool = True, episodes: int = 1, red_policy='ra
 if __name__ == '__main__':
     env = battle_v4.env(render_mode='human')
     """
-    red_policy: random, default, vcg, seq
+    red_policy: random, default, vcg, seq, rand_n
     """
-    mkt_mech(env, render=False, episodes=1, red_policy='seq', blue_policy='random')
+    mkt_mech(env, render=False, episodes=1, red_policy='rand_n', blue_policy='random')
